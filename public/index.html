@@ -1,1 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Falcon Voice — AI Text to Speech</title>
+<meta name="description" content="Turn text into natural-sounding speech with Falcon Voice. Choose a voice, generate audio and download it as WAV.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/pages.css">
+<style>
+:root{
+  --paper:#E8EBEF; --panel:#F7F8FA; --ink:#12161C; --mute:#5A6372; --line:#C7CDD6;
+  --blue:#2B3AF0; --blue-dk:#1E29B8; --sky:#C9D0FF; --err:#B3261E; --ok:#17794A;
+  --display:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;
+  --body:'Instrument Sans','Segoe UI',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+html{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;scroll-behavior:smooth}
+body{min-height:100vh}
+.wrap{max-width:1080px;margin:0 auto;padding:0 clamp(16px,4vw,40px)}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
 
+/* top bar */
+header{display:flex;align-items:center;justify-content:space-between;padding:20px 0;gap:12px}
+.logo{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.02em;text-decoration:none}
+.right{display:flex;align-items:center;gap:10px}
+.pill{font:600 14px var(--body);background:var(--panel);border:1.5px solid var(--ink);border-radius:999px;padding:7px 14px;cursor:pointer;color:var(--ink)}
+.pill.credits b{color:var(--blue)}
+
+/* buttons / fields */
+.btn{font:600 15px var(--body);border:1.5px solid var(--ink);background:#fff;color:var(--ink);padding:12px 20px;border-radius:10px;cursor:pointer;text-decoration:none;display:inline-block;text-align:center}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.primary:hover{background:var(--blue-dk)}
+.btn.dark{background:var(--ink);color:#fff}
+.btn:disabled{opacity:.55;cursor:wait}
+label{font-weight:600;font-size:14px;display:block;margin-bottom:6px}
+textarea,select,input[type=text],input[type=email],input[type=password]{width:100%;font:16px var(--body);color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:12px}
+textarea{min-height:200px;resize:vertical;line-height:1.55}
+.note{font-size:14px;color:var(--mute)}
+.status{font-size:14px;min-height:21px}
+.status.err{color:var(--err)} .status.ok{color:var(--ok)}
+.hidden{display:none!important}
+
+/* hero */
+.hero{padding:clamp(20px,5vw,56px) 0 32px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(44px,9vw,104px);line-height:.92;letter-spacing:-.035em}
+.lede{color:var(--mute);margin-top:16px;max-width:50ch;font-size:18px}
+.lede b{color:var(--ink)}
+
+/* generator */
+.studio{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;margin-top:32px}
+@media(max-width:860px){.studio{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1.5px solid var(--line);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:14px}
+.card h2{font-family:var(--display);font-size:20px;font-weight:800}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+.filter-field{flex:1 1 130px;min-width:0}
+.voice-field{flex:2 1 210px;min-width:170px}
+.actions{align-items:center}
+.actions #go{flex:0 0 auto}
+.count{font-size:13px;color:var(--mute);text-align:right;margin-top:4px}
+canvas{width:100%;height:110px;background:#fff;border:1.5px solid var(--line);border-radius:10px;display:block}
+audio{width:100%}
+.empty{color:var(--mute);font-size:14px;border:1.5px dashed var(--line);border-radius:10px;padding:18px}
+
+/* pricing */
+.pricing{background:var(--ink);color:#fff;margin-top:72px;padding:64px 0 72px}
+.pricing h2{font-family:var(--display);font-weight:800;font-size:clamp(32px,5vw,52px);letter-spacing:-.02em;line-height:1}
+.pricing .lede{color:#AEB6C4}
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-top:32px}
+.plan{border:1.5px solid #3A4252;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:6px}
+.plan.featured{background:#fff;color:var(--ink);border-color:#fff}
+.plan .tag{align-self:flex-start;font-size:13px;font-weight:600;background:var(--sky);color:var(--ink);padding:3px 10px;border-radius:999px}
+.plan .name{font-family:var(--display);font-weight:800;font-size:22px}
+.plan .price{font-family:var(--display);font-weight:800;font-size:44px;letter-spacing:-.02em;line-height:1.1;margin-top:6px}
+.plan .per{font-size:14px;opacity:.75}
+.plan .btn{margin-top:auto}
+.plan .btn.light{background:transparent;color:#fff;border-color:#fff}
+.plan .spacer{height:14px}
+.free-line{margin-top:28px;font-size:14px;color:#AEB6C4}
+footer{padding:28px 0 40px;font-size:14px;color:var(--mute)}
+
+/* auth dialog */
+dialog{border:0;border-radius:18px;padding:0;width:min(440px,92vw);max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);overflow-y:auto;overscroll-behavior:contain;background:var(--panel);color:var(--ink);box-shadow:0 20px 70px rgba(18,22,28,.35)}
+dialog::backdrop{background:rgba(18,22,28,.55)}
+.dlg{padding:28px;display:flex;flex-direction:column;gap:14px}
+.dlg h3{font-family:var(--display);font-weight:800;font-size:28px;letter-spacing:-.02em;line-height:1.05}
+.seg{display:flex;border:1.5px solid var(--ink);border-radius:999px;padding:3px;background:#fff}
+.seg button{flex:1;font:600 14px var(--body);border:0;background:none;padding:9px;border-radius:999px;cursor:pointer;color:var(--ink)}
+.seg button[aria-selected=true]{background:var(--ink);color:#fff}
+.or{display:flex;align-items:center;gap:10px;color:var(--mute);font-size:13px}
+.or::before,.or::after{content:"";height:1px;background:var(--line);flex:1}
+.link{background:none;border:0;font:inherit;font-size:14px;color:var(--blue);cursor:pointer;text-align:left;padding:0;text-decoration:underline}
+.close{align-self:flex-end;background:none;border:0;font-size:22px;cursor:pointer;line-height:1;color:var(--mute)}
+.banner{background:#FFF3CD;border:1.5px solid #E6C766;border-radius:10px;padding:12px 14px;font-size:14px;margin-bottom:8px}
+@media(max-width:640px){
+  .wrap{padding-inline:16px}
+  header{padding:14px 0}
+  .logo{font-size:20px;white-space:nowrap}
+  .right{gap:6px;min-width:0}
+  .pill{min-height:40px;padding:7px 9px;font-size:12px;white-space:nowrap}
+  .hero{padding:24px 0 20px}
+  h1{font-size:clamp(42px,12vw,64px)}
+  .lede{font-size:16px;margin-top:12px}
+  .studio{gap:14px;margin-top:24px}
+  .card{padding:16px;border-radius:14px;gap:12px}
+  .card h2{font-size:18px}
+  textarea{min-height:160px}
+  .filter-field{flex-basis:calc(50% - 5px)}
+  .voice-field{flex:1 1 100%;min-width:0}
+  .actions{align-items:stretch;flex-direction:column}
+  .actions #go{width:100%}
+  .actions .note{text-align:center}
+  .pricing{margin-top:44px;padding:40px 0}
+  .pricing h2{font-size:clamp(30px,8vw,42px)}
+  .plans{grid-template-columns:1fr;gap:12px;margin-top:22px}
+  .plan{padding:20px}
+  .plan .price{font-size:40px}
+  .plan .btn,.empty{width:100%}
+  .free-line{margin-top:20px}
+  footer{padding:22px 0 30px}
+  .dlg{padding:22px}
+}
+@media(max-width:360px){
+  header{display:grid;grid-template-columns:1fr;gap:8px}
+  .right{justify-content:flex-start}
+  .wrap{padding-inline:12px}
+  .card{padding:14px}
+  .filter-field{flex-basis:calc(50% - 5px)}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <a class="logo" href="/">Falcon Voice</a>
+    <div class="right">
+      <button class="pill credits hidden" id="creditsPill" title="Buy credits"><b id="creditsNum">0</b> credits</button>
+      <button class="pill" id="authBtn">Sign in</button>
+    </div>
+  </header>
+  <nav class="site-nav home-nav" aria-label="Main navigation">
+    <a href="/">Home</a><a href="/services.html">Services</a><a href="/reviews.html">Reviews</a><a href="/contact.html">Contact</a><a href="/policies.html">Policies</a>
+  </nav>
+
+  <div class="banner hidden" id="setupBanner"></div>
+
+  <section class="hero">
+    <h1>Type it.<br>Hear it.</h1>
+    <p class="lede">Turn any text into a natural voice in seconds. Create an account and get <b id="freeN">5</b> audios free. No card needed.</p>
+
+    <div class="studio">
+      <div class="card">
+        <h2>Your text</h2>
+        <div>
+          <label for="text">What should the voice say?</label>
+          <textarea id="text" maxlength="1000" placeholder="Type or paste your script here.">Hello! Welcome to my channel. Thanks for watching, and don't forget to subscribe.</textarea>
+          <div class="count"><span id="chars">0</span> / <span id="maxc">1000</span></div>
+        </div>
+        <div class="row">
+          <div class="filter-field"><label for="lang">Language</label><select id="lang"></select></div>
+          <div class="filter-field"><label for="gender">Voice type</label><select id="gender"><option value="all">Any</option><option value="masculine">Boy</option><option value="feminine">Girl</option></select></div>
+          <div class="voice-field"><label for="voice">Voice</label><select id="voice"><option>Loading voices…</option></select></div>
+        </div>
+        <div class="row actions">
+          <button class="btn primary" id="go">Generate voice</button>
+          <span class="note" id="costNote">Uses 1 credit</span>
+        </div>
+        <div class="status" id="status" role="status"></div>
+      </div>
+
+      <div class="card">
+        <h2>Your audio</h2>
+        <div class="empty" id="emptyOut">Your voice will appear here after you generate it.</div>
+        <canvas id="wave" width="800" height="220" class="hidden"></canvas>
+        <audio id="player" controls class="hidden"></audio>
+        <a class="btn hidden" id="dl" download="voice.wav">Download WAV</a>
+      </div>
+    </div>
+  </section>
+</div>
+
+<section class="pricing" id="pricing">
+  <div class="wrap">
+    <h2>Pay only for what you generate</h2>
+    <p class="lede">One credit makes one audio. Credits never expire.</p>
+    <div class="plans" id="plans"></div>
+    <p class="free-line" id="payNote"></p>
+  </div>
+</section>
+
+<div class="wrap">
+  <footer class="site-footer">
+    <span>Falcon Voice · Owned by Ankit Choudhary. Only use text and voices you have the right to use.</span>
+    <nav aria-label="Policy links"><a href="/policies.html#privacy">Privacy</a><a href="/policies.html#terms">Terms</a><a href="/policies.html#refunds">Refunds</a></nav>
+  </footer>
+</div>
+
+<!-- sign in / create account -->
+<dialog id="authDlg">
+  <div class="dlg">
+    <button class="close" id="authClose" aria-label="Close">&times;</button>
+    <h3 id="authTitle">Sign in to generate</h3>
+    <div class="seg" role="tablist">
+      <button role="tab" aria-selected="true" data-mode="in">Sign in</button>
+      <button role="tab" aria-selected="false" data-mode="up">Create account</button>
+    </div>
+    <button class="btn" id="googleBtn">Continue with Google</button>
+    <div class="or">or use email</div>
+    <div><label for="email">Email</label><input type="email" id="email" autocomplete="email"></div>
+    <div><label for="pass">Password</label><input type="password" id="pass" autocomplete="current-password" placeholder="At least 6 characters"></div>
+    <button class="btn primary" id="authGo">Sign in</button>
+    <button class="link" id="forgot">Forgot password?</button>
+    <button class="link hidden" id="verifyEmailBtn">Resend verification email</button>
+    <div class="status" id="authStatus" role="status"></div>
+  </div>
+</dialog>
+
+<script type="module">
+import { firebaseConfig } from './firebase-config.js';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, sendPasswordResetEmail, sendEmailVerification } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+const $ = s => document.querySelector(s);
+const LANGS = {en:'English',hi:'Hindi',es:'Spanish',fr:'French',de:'German',pt:'Portuguese',it:'Italian',ja:'Japanese',ko:'Korean',zh:'Chinese',ru:'Russian',tr:'Turkish',nl:'Dutch',pl:'Polish',sv:'Swedish'};
+const setStatus = (sel, msg, kind) => { const e = $(sel); e.textContent = msg || ''; e.className = 'status' + (kind ? ' ' + kind : ''); };
+
+let cfg = { freeCredits: 5, maxChars: 1000, plans: [], razorpayKeyId: null };
+let user = null, credits = null, isAdmin = false, requiresEmailVerification = false, signupInProgress = false, voices = [];
+
+// ---------- firebase ----------
+const configured = !String(firebaseConfig.apiKey).startsWith('PASTE');
+let auth = null;
+if (configured) { auth = getAuth(initializeApp(firebaseConfig)); }
+else {
+  const b = $('#setupBanner'); b.classList.remove('hidden');
+  b.textContent = 'Setup needed: paste your Firebase web config into public/firebase-config.js so login can work.';
+}
+const token = () => auth.currentUser.getIdToken();
+
+async function api(path, opts = {}, needAuth = false) {
+  const headers = { ...(opts.headers || {}) };
+  if (needAuth) headers.Authorization = 'Bearer ' + await token();
+  const r = await fetch(path, { ...opts, headers });
+  if (!r.ok) {
+    let m = r.statusText; try { m = (await r.json()).error || m; } catch {}
+    const e = new Error(m); e.status = r.status; throw e;
+  }
+  return r;
+}
+
+// ---------- config + voices ----------
+async function init() {
+  try {
+    cfg = await (await api('/api/config')).json();
+    $('#freeN').textContent = cfg.freeCredits; $('#maxc').textContent = cfg.maxChars; $('#text').maxLength = cfg.maxChars;
+    renderPlans();
+  } catch {}
+  try { voices = await (await api('/api/voices')).json(); fillVoices(); }
+  catch (e) { $('#voice').innerHTML = '<option value="">Could not load voices</option>'; setStatus('#status', 'Could not load voices: ' + e.message, 'err'); }
+  updateChars();
+}
+$('#lang').innerHTML = Object.entries(LANGS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
+const GENDERS = { masculine: 'Boy', feminine: 'Girl' };
+function fillVoices() {
+  const lang = $('#lang').value, gender = $('#gender').value, sel = $('#voice'), keep = sel.value;
+  const isIndianHindi = v => v.language === 'hi' && (v.country === 'IN' || v.accents?.some(a => a.locale === 'hi-IN' && a.is_native));
+  const list = voices
+    .filter(v => v.language === lang && (gender === 'all' || v.gender === gender))
+    .sort((a, b) => Number(isIndianHindi(b)) - Number(isIndianHindi(a)));
+  if (!list.length) {
+    const option = document.createElement('option'); option.value = ''; option.textContent = 'No matching voices';
+    sel.replaceChildren(option); return;
+  }
+  sel.replaceChildren(...list.map(v => {
+    const o = document.createElement('option');
+    o.value = v.id; o.textContent = `${v.name} — ${LANGS[v.language] || v.language}${GENDERS[v.gender] ? ' · ' + GENDERS[v.gender] : ''}`;
+    if (v.description) o.title = v.description;
+    return o;
+  }));
+  if (keep && list.some(v => v.id === keep)) sel.value = keep;
+}
+$('#lang').onchange = fillVoices;
+$('#gender').onchange = fillVoices;
+function updateChars() { $('#chars').textContent = $('#text').value.length; }
+$('#text').oninput = updateChars;
+
+// ---------- credits UI ----------
+function renderAccount() {
+  $('#authBtn').textContent = user ? 'Sign out' : 'Sign in';
+  $('#creditsPill').classList.toggle('hidden', !user);
+  if (isAdmin) $('#creditsNum').textContent = 'Unlimited';
+  else if (credits !== null) $('#creditsNum').textContent = credits;
+  $('#creditsPill').title = isAdmin ? 'Admin account — unlimited generation' : 'Buy credits';
+  $('#costNote').textContent = user ? (isAdmin ? 'Admin · unlimited generation' : credits === 0 ? 'No credits left. Buy more below.' : 'Uses 1 credit') : `Sign in to get ${cfg.freeCredits} free audios`;
+}
+async function refreshMe() {
+  try {
+    const me = await (await api('/api/me', {}, true)).json();
+    credits = me.credits; isAdmin = me.isAdmin === true;
+    requiresEmailVerification = me.requiresEmailVerification === true;
+    return me;
+  } catch {
+    credits = null; isAdmin = false; requiresEmailVerification = false;
+    return null;
+  }
+  finally { renderAccount(); }
+}
+if (auth) onAuthStateChanged(auth, async u => {
+  user = u;
+  if (u) {
+    await refreshMe();
+    $('#verifyEmailBtn').classList.toggle('hidden', !requiresEmailVerification);
+    if (isAdmin) {
+      setStatus('#status', '');
+      if ($('#authDlg').open) $('#authDlg').close();
+    } else if (requiresEmailVerification) {
+      const message = 'Verify the admin email to activate unlimited access, then sign out and sign in again.';
+      setStatus('#status', message, 'err');
+      if ($('#authDlg').open) setStatus('#authStatus', message, 'err');
+    } else {
+      setStatus('#status', '');
+      if ($('#authDlg').open && !signupInProgress) $('#authDlg').close();
+    }
+  } else {
+    credits = null; isAdmin = false; requiresEmailVerification = false;
+    $('#verifyEmailBtn').classList.add('hidden');
+    setStatus('#status', '');
+    renderAccount();
+  }
+});
+$('#creditsPill').onclick = () => { if (!isAdmin) $('#pricing').scrollIntoView(); };
+
+// ---------- auth dialog ----------
+let mode = 'in';
+const dlg = $('#authDlg');
+function openAuth(m = 'in', title) { setMode(m); if (title) $('#authTitle').textContent = title; setStatus('#authStatus', ''); dlg.showModal(); }
+function setMode(m) {
+  mode = m;
+  dlg.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-selected', b.dataset.mode === m));
+  $('#authGo').textContent = m === 'in' ? 'Sign in' : 'Create account';
+  $('#authTitle').textContent = m === 'in' ? 'Sign in to generate' : `Create your account. ${cfg.freeCredits} audios free.`;
+  $('#pass').autocomplete = m === 'in' ? 'current-password' : 'new-password';
+  $('#forgot').classList.toggle('hidden', m !== 'in');
+}
+dlg.querySelectorAll('.seg button').forEach(b => b.onclick = () => setMode(b.dataset.mode));
+$('#authClose').onclick = () => dlg.close();
+$('#authBtn').onclick = () => { if (!configured) return alert('Add your Firebase config first (public/firebase-config.js).'); user ? signOut(auth) : openAuth('in'); };
+
+const ERR = {
+  'auth/invalid-credential': 'Email or password is wrong.', 'auth/user-not-found': 'No account with this email.',
+  'auth/wrong-password': 'Email or password is wrong.', 'auth/email-already-in-use': 'This email already has an account. Try signing in.',
+  'auth/weak-password': 'Use a password with at least 6 characters.', 'auth/invalid-email': 'Enter a valid email address.',
+  'auth/popup-closed-by-user': 'Google sign-in was closed.', 'auth/too-many-requests': 'Too many attempts. Try again in a few minutes.',
+  'auth/popup-blocked': 'Your browser blocked the Google sign-in window. Allow popups for this site and try again.',
+  'auth/cancelled-popup-request': 'A Google sign-in is already in progress. Finish or close that window before retrying.',
+  'auth/network-request-failed': 'No internet connection.', 'auth/operation-not-allowed': 'This sign-in method is not enabled in Firebase yet.',
+  'auth/unauthorized-domain': 'This domain is not allowed in Firebase. Add it under Authentication > Settings > Authorized domains.'
+};
+const authErr = (e, method) => {
+  let message = ERR[e.code] || e.message;
+  if (e.code === 'auth/operation-not-allowed') {
+    message = method === 'google'
+      ? 'Google sign-in is disabled. Enable Google under Firebase Authentication > Sign-in method.'
+      : 'Email/password sign-in is disabled. Enable Email/Password under Firebase Authentication > Sign-in method.';
+  }
+  setStatus('#authStatus', message, 'err');
+};
+
+$('#authGo').onclick = async () => {
+  const email = $('#email').value.trim(), pass = $('#pass').value;
+  if (!email || !pass) return setStatus('#authStatus', 'Enter your email and password.', 'err');
+  $('#authGo').disabled = true; setStatus('#authStatus', 'One moment…');
+  try {
+    if (mode === 'in') await signInWithEmailAndPassword(auth, email, pass);
+    else {
+      signupInProgress = true;
+      const credential = await createUserWithEmailAndPassword(auth, email, pass);
+      const account = await (await api('/api/me', {}, true)).json();
+      if (account.requiresEmailVerification && !credential.user.emailVerified) {
+        await sendEmailVerification(credential.user);
+        setStatus('#authStatus', 'Account created. Check your inbox and verify your email to activate admin access.');
+      } else if ($('#authDlg').open) {
+        $('#authDlg').close();
+      }
+    }
+  }
+  catch (e) { authErr(e, 'email'); }
+  finally { signupInProgress = false; $('#authGo').disabled = false; }
+};
+$('#googleBtn').onclick = async () => {
+  const btn = $('#googleBtn'); btn.disabled = true; setStatus('#authStatus', 'Opening Google sign-in…');
+  try { await signInWithPopup(auth, new GoogleAuthProvider()); }
+  catch (e) { authErr(e, 'google'); }
+  finally { btn.disabled = false; }
+};
+$('#forgot').onclick = async () => {
+  const email = $('#email').value.trim(); if (!email) return setStatus('#authStatus', 'Type your email above first.', 'err');
+  try { await sendPasswordResetEmail(auth, email); setStatus('#authStatus', 'Reset link sent. Check your inbox.', 'ok'); } catch (e) { authErr(e, 'email'); }
+};
+$('#verifyEmailBtn').onclick = async () => {
+  if (!auth.currentUser) return setStatus('#authStatus', 'Sign in first to resend the verification email.', 'err');
+  try { await sendEmailVerification(auth.currentUser); setStatus('#authStatus', 'Verification email sent. Check your inbox.', 'ok'); }
+  catch (e) { authErr(e, 'email'); }
+};
+
+// ---------- generate ----------
+async function drawWave(blob) {
+  const cv = $('#wave'), g = cv.getContext('2d'), ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const data = (await ctx.decodeAudioData(await blob.arrayBuffer())).getChannelData(0); ctx.close();
+  g.clearRect(0, 0, cv.width, cv.height);
+  const bars = 150, step = Math.floor(data.length / bars), mid = cv.height / 2; g.fillStyle = '#2B3AF0';
+  for (let i = 0; i < bars; i++) {
+    let peak = 0; for (let j = 0; j < step; j += 40) peak = Math.max(peak, Math.abs(data[i * step + j] || 0));
+    const h = Math.max(4, peak * (cv.height - 20)); g.fillRect(i * (cv.width / bars) + 1, mid - h / 2, cv.width / bars - 3, h);
+  }
+}
+$('#go').onclick = async () => {
+  const text = $('#text').value.trim(), voice_id = $('#voice').value;
+  if (!text) return setStatus('#status', 'Write some text first.', 'err');
+  if (!user) return openAuth('up', `Create your account. ${cfg.freeCredits} audios free.`);
+  if (!isAdmin && credits === 0) { setStatus('#status', 'You are out of credits. Pick a plan below.', 'err'); return $('#pricing').scrollIntoView(); }
+  if (!voice_id) return setStatus('#status', 'Choose a voice.', 'err');
+  const btn = $('#go'); btn.disabled = true; setStatus('#status', 'Generating…');
+  try {
+    const r = await api('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text, voice_id, language: $('#lang').value }) }, true);
+    const left = r.headers.get('X-Credits-Left');
+    if (!isAdmin && left !== null) { credits = Number(left); renderAccount(); }
+    const blob = await r.blob(), url = URL.createObjectURL(blob);
+    $('#emptyOut').classList.add('hidden'); ['#wave', '#player', '#dl'].forEach(s => $(s).classList.remove('hidden'));
+    $('#player').src = url; $('#player').play().catch(() => {}); $('#dl').href = url;
+    await drawWave(blob); setStatus('#status', 'Done.', 'ok');
+  } catch (e) {
+    setStatus('#status', e.message, 'err');
+    if (e.status === 402) $('#pricing').scrollIntoView(); if (e.status === 401) await refreshMe();
+  }
+  btn.disabled = false;
+};
+
+// ---------- pricing + payments ----------
+const rupees = p => '₹' + (p / 100).toLocaleString('en-IN');
+function renderPlans() {
+  $('#plans').replaceChildren(...cfg.plans.map(p => {
+    const d = document.createElement('div'); d.className = 'plan' + (p.featured ? ' featured' : '');
+    d.innerHTML = `${p.featured ? '<span class="tag">Best value</span>' : '<span class="spacer"></span>'}<div class="name"></div><div class="price"></div><div class="per"></div><button class="btn ${p.featured ? 'primary' : 'light'}">Buy ${p.credits} credits</button>`;
+    d.querySelector('.name').textContent = p.name; d.querySelector('.price').textContent = rupees(p.amount);
+    d.querySelector('.per').textContent = `${p.credits} audios. ${p.note}. About ${rupees(Math.round(p.amount / p.credits))} each.`;
+    d.querySelector('button').onclick = () => buy(p.id); return d;
+  }));
+  $('#payNote').textContent = cfg.razorpayKeyId ? `New accounts start with ${cfg.freeCredits} free credits. Payments are handled securely by Razorpay.` : 'Payments are not switched on yet.';
+}
+function loadRazorpay() {
+  return new Promise((ok, no) => { if (window.Razorpay) return ok(); const s = document.createElement('script'); s.src = 'https://checkout.razorpay.com/v1/checkout.js'; s.onload = ok; s.onerror = () => no(new Error('Could not load the payment window.')); document.head.append(s); });
+}
+async function buy(plan) {
+  if (!user) return openAuth('up', 'Create an account to buy credits');
+  if (!cfg.razorpayKeyId) return setStatus('#status', 'Payments are not set up yet.', 'err');
+  try {
+    const o = await (await api('/api/pay/order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plan }) }, true)).json();
+    await loadRazorpay();
+    new window.Razorpay({
+      key: cfg.razorpayKeyId, order_id: o.order_id, amount: o.amount, currency: o.currency, name: 'Falcon Voice', description: o.name,
+      prefill: { email: o.email }, theme: { color: '#2B3AF0' },
+      handler: async resp => {
+        try {
+          const v = await (await api('/api/pay/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(resp) }, true)).json();
+          credits = v.credits; renderAccount(); window.scrollTo({ top: 0 }); setStatus('#status', `Payment done. You now have ${credits} credits.`, 'ok');
+        } catch (e) { setStatus('#status', e.message + ' If money was deducted, contact support with your payment ID.', 'err'); }
+      },
+    }).open();
+  } catch (e) { setStatus('#status', e.message, 'err'); }
+}
+
+renderAccount();
+init();
+</script>
+</body>
+</html>
