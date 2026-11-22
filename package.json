@@ -1,0 +1,8 @@
+{
+  "name": "ai-voice-studio",
+  "version": "1.0.0",
+  "description": "Text to Speech, Voice Clone and Speech to Text powered by Cartesia",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" }
+}
