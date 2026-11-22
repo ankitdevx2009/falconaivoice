@@ -1,3 +1,19 @@
+
+# Secrets
 .env
-db.json
-node_modules
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Temporary files
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
