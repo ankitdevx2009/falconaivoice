@@ -103,6 +103,34 @@ let voiceCache = { data: null, exp: 0 };
 const busy = new Set();
 
 const server = http.createServer(async (req, res) => {
+  
+const allowedOrigin = 'https://falconaivoice.netlify.app';
+
+if (req.headers.origin === allowedOrigin) {
+  res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+  res.setHeader('Vary', 'Origin');
+}
+
+res.setHeader(
+  'Access-Control-Allow-Methods',
+  'GET, POST, OPTIONS'
+);
+
+res.setHeader(
+  'Access-Control-Allow-Headers',
+  'Content-Type, Authorization'
+);
+
+res.setHeader(
+  'Access-Control-Expose-Headers',
+  'X-Credits-Left'
+);
+
+if (req.method === 'OPTIONS') {
+  res.writeHead(204);
+  return res.end();
+}
+
   const url = new URL(req.url, 'http://localhost');
   try {
     // ----- static files -----
